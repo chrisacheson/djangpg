@@ -48,7 +48,7 @@ class GPG():
         import_result = gpg.import_keys(keydata)
         fingerprints = [result['fingerprint'] for result in import_result.results]
         keys = []
-        ekeys = dict([[key['fingerprint'], uid_parser.match(key['uids'][1]).groupdict()] for key in gpg.list_keys() if key is not None and key != ""])
+        ekeys = dict([[key['fingerprint'], uid_parser.match(key['uids'][0]).groupdict()] for key in gpg.list_keys() if key is not None and key != ""])
         for fingerprint in fingerprints:
             if not fingerprint in ekeys: raise GPGError("Error importing key " + str(fingerprint))
             key = ekeys[fingerprint]
