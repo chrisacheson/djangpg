@@ -16,9 +16,9 @@ class GPGError(Exception):
 class GPG():
     def __init__(self):
         pass
-    def sign_and_crypt(self, data, recipient):
+    def sign_and_encrypt(self, data, recipient):
         return gpg.encrypt(data, (recipient,), sign=settings.GPG['SERVER_KEY'],
-                                     passphrase=settings.GPG['SERVER_PASSPHRASE']).data
+                                     passphrase=settings.GPG['SERVER_PASSPHRASE'], always_trust=True).data
 
     def decrypt_and_verify(self, data):
         '''Given PGP-signed and encrypted data
@@ -66,4 +66,4 @@ class GPG():
     def send_mail(self, user, subject, body):
         pubkey = PublicKey.objects.get(user__username__exact=user.username)
         encbody = self.sign_and_encrypt(body, pubkey.fingerprint)
-        send_mail(encbody, settings.GPG['ENCMAIL_FROM'], (user.email,))
+        send_mail(subject, encbody, settings.GPG['ENCMAIL_FROM'], (user.email,))
