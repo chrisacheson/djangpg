@@ -4,7 +4,7 @@
 
 {% if error_message %}<strong>{{ error_message }}</strong>{% endif %}
 
-<form action="/djangpg/addkey" method="post">
+<form action="/djangpg/addkey/" method="post">
 {% csrf_token %}
 <label>Paste your GPG key in here.</label><br />
 <textarea name="key" rows=4 cols=20></textarea>

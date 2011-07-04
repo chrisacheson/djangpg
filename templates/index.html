@@ -3,10 +3,23 @@
 
 {% if error_message %}<strong>{{ error_message }}</strong>{% endif %}
 
+{% if messages %}
+<ul class="messages">
+	{% for message in messages %}
+	<li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+	{% endfor %}
+</ul>
+{% endif %}
+
+{% if user.is_authenticated %}
+<p>You are logged in as {{ user.username }}.</p>
+<p><a href="/djangpg/logout/">Log Out</a></p>
+{% else %}
 <ul>
 	<li><a href="/djangpg/newkey/">New Key</a></li>
 	<li><a href="/djangpg/login/">Log In</a></li>
 </ul>
+{% endif %}
 
 </body>
 </html>

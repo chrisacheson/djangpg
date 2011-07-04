@@ -2,9 +2,10 @@ from django.conf.urls.defaults import *
 import djangpgapp.views
 
 urlpatterns = patterns('djangpgapp.views',
-        (r'^$', 'index'),
-        (r'^newkey/$', 'keyinput'),
-        (r'^addkey/$', 'addkey'),
-        (r'^login/$', 'otplogin'),
-        (r'^checkotp/$', 'checkotp'),
+        (r'^$', 'index_view'),
+        (r'^newkey/$', 'keyinput_view'),
+        (r'^addkey/$', 'keyinput_post'),
+        (r'^login/$', 'login_view'),
+        (r'^checkotp/$', 'login_post'),
+        (r'^logout/$', 'logout_view'),
 )
