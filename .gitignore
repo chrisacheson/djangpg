@@ -2,5 +2,6 @@
 *.db
 *.gpg
 *.gpg~
+*.swp
 keyring/*
 !.gitignore

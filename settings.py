@@ -58,7 +58,8 @@ MEDIA_URL = ''
 ADMIN_MEDIA_PREFIX = '/media/'
 
 # Make this unique, and don't share it with anybody.
-SECRET_KEY = 't8-9)hr-3&!$(z_1ru!vd%!e&yw3*3#rxf4x2njv!*c-$7dss('
+SECRET_KEY = 'change_me'
+assert(SECRET_KEY != 'change_me')
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
@@ -96,4 +97,13 @@ INSTALLED_APPS = (
     'django.contrib.admindocs',
     'djangpgapp'
 )
-GPG = {"HOMEDIR": "djangpg", "SERVER_PASSPHRASE": "Foo", "SERVER_KEY": "94C4DB84"}
+
+AUTHENTICATION_BACKENDS = ("djangpgapp.otpbackend.OTPBackend",)
+
+GPG = {"HOMEDIR": "keyring", "SERVER_PASSPHRASE": "", "SERVER_KEY": "", "ENCMAIL_FROM": ""}
+
+EMAIL_HOST = ""
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = ""
+EMAIL_HOST_PASSWORD = ""
