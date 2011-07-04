@@ -1,0 +1,23 @@
+---------------
+Getting Started
+---------------
+
+Create djangpg's keyring and import your server keypair:
+
+	gpg --homedir keyring/ --import private_key.gpg public_key.gpg
+
+Edit settings.py.  In addition to the usual Django settings, you'll need to change the following:
+
+	GPG:
+		SERVER_KEY: the ID of your server keypair
+		SERVER_PASSPHRASE: the passphrase of your server key
+		ENCMAIL_FROM: email address that encrypted mail will be sent from
+	EMAIL_HOST: SMTP server through which to send mail
+	EMAIL_PORT
+	EMAIL_USE_TLS
+	EMAIL_HOST_USER
+	EMAIL_HOST_PASSWORD
+
+Set up the database:
+
+	python manage.py syncdb
