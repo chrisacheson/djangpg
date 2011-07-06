@@ -9,9 +9,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 
-from djangpgapp.gpg import GPG
 from djangpgapp.models import PublicKey, OneTimePassword
-gpg = GPG()
 
 def index_view(request):
     return render_to_response("index.html", context_instance=RequestContext(request))
@@ -21,8 +19,11 @@ def keyinput_view(request):
 
 def keyinput_post(request):
     key = request.POST['key']
-    user_from_keydata(key)
-    messages.success(request, "Your key has been imported.  Check your email for an encrypted list of one-time passwords.")
+    key_objects = PublicKey.make_from_keydata(key)
+    if len(key_objects) > 0:
+        messages.success(request, "Your key has been imported.  Check your email for an encrypted list of one-time passwords.")
+    else:
+        messages.error(request, "Key import failed.")
     return HttpResponseRedirect(reverse('djangpgapp.views.index_view'))
 
 def login_view(request):
@@ -46,17 +47,3 @@ def logout_view(request):
         logout(request)
         messages.success(request, "You have successfully logged out.")
     return HttpResponseRedirect(reverse('djangpgapp.views.index_view'))
-
-# This should be part of the PublicKey model.
-def user_from_keydata(keydata):
-    results = gpg.add_key(keydata)
-    assert len(results) == 1
-    key = results[0]
-    username, email = key.username, key.email
-    # Create an active user with no usable password.
-    user = User.objects.create_user(username, email)
-    user.save()
-    key.user = user
-    key.save()
-    OneTimePassword.make_new_batch(user)
-    return user, key

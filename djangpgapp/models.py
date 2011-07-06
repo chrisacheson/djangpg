@@ -1,14 +1,93 @@
 from django.db import models
 from django.db.models import F
+from django.db import IntegrityError
+from django.conf import settings
 from django.contrib.auth.models import User
+from django.core.mail import send_mail
+
 import hashlib
 from random import SystemRandom
+import gnupg
+import re
+
+class GPGError(Exception):
+    pass
 
 class PublicKey(models.Model):
     fingerprint = models.CharField(max_length=40, unique=True)
     email = models.EmailField()
     username = models.CharField(max_length=64)
     user = models.ForeignKey(User, blank=True, null=True)
+
+    # Private: Interface to python-gnupg.
+    _gpg = gnupg.GPG(gnupghome = settings.GPG['HOMEDIR'])
+
+    @staticmethod
+    def make_from_keydata(keydata):
+        """
+        Given a public key block, import and create PublicKey models for any keys found.
+        Create a new user and associate them with all the PublicKey objects created.
+
+        Return a list of the new PublicKey objects.
+        """
+        gpg = PublicKey._gpg
+        uid_parser = re.compile(r"(?P<username>.*?)( \((?P<comment>.*?)\))? \<(?P<email>.*)\>")
+
+        import_result = gpg.import_keys(keydata)
+        fingerprints = [result['fingerprint'] for result in import_result.results]
+        keys = []
+        ekeys = dict([[key['fingerprint'], uid_parser.match(key['uids'][0]).groupdict()] for key in gpg.list_keys() if key is not None and key != ""])
+
+        for fingerprint in fingerprints:
+            if not fingerprint in ekeys: raise GPGError("Error importing key " + str(fingerprint))
+            key = ekeys[fingerprint]
+
+            newkey = PublicKey(username=key['username'], fingerprint=fingerprint, email=key['email'])
+            try:
+                newkey.save()
+            except IntegrityError:
+                #Key exists already
+                pass
+
+            keys.append(newkey)
+
+        if len(keys) > 0:
+            # Create an active user with no usable password.
+            # TODO: Currently we set the username from the name on the first key.  The other keys are saved but not used.
+            # Consider letting the user pick their username and manage their keys.
+            user = User.objects.create_user(keys[0].username, keys[0].email)
+            user.save()
+
+            for key in keys:
+                key.user = user
+                key.save()
+
+            OneTimePassword.make_new_batch(user)
+
+        return keys
+
+    def sign_and_encrypt(self, plaintext):
+        """
+        Given plaintext data, sign it with the server key, encrypt it with this PublicKey.
+
+        Return a PGP block with the signed and encrypted data.
+        """
+        keys = (self.fingerprint,)
+        server_key = settings.GPG['SERVER_KEY']
+        passphrase = settings.GPG['SERVER_PASSPHRASE']
+
+        pgp_block = PublicKey._gpg.encrypt(plaintext, keys, sign=server_key, passphrase=passphrase, always_trust=True).data
+        # Don't fail silently.
+        assert(len(pgp_block) > 0)
+
+        return pgp_block
+
+    def send_mail(self, subject, body):
+        """
+        Send encrypted email to the address on this PublicKey, signed with the server key.
+        """
+        encrypted_body = self.sign_and_encrypt(body)
+        send_mail(subject, encrypted_body, settings.GPG['ENCMAIL_FROM'], (self.email,))
 
 class OneTimePassword(models.Model):
     user = models.ForeignKey(User)
@@ -103,13 +182,10 @@ class OneTimePassword(models.Model):
         current_otps.update(expiration_counter=F("expiration_counter")+1)
         current_otps.filter(expiration_counter__gte=expire_at_count).delete()
 
-        # Ugly workaround for circular dependency.
-        # Consider getting rid of the gpg module and merging its methods into the PublicKey model.
-        from gpg import GPG
-        gpg = GPG()
-
         new_batch_strings = [OneTimePassword.generate(user).get_otpstring() for i in range(otp_batch_size)]
 
         mail_subject = "New one-time passwords"
         mail_body = "\n".join(new_batch_strings)
-        gpg.send_mail(user, mail_subject, mail_body)
+
+        key = user.publickey_set.all()[0]
+        key.send_mail(mail_subject, mail_body)
