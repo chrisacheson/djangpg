@@ -100,7 +100,7 @@ INSTALLED_APPS = (
 
 AUTHENTICATION_BACKENDS = ("djangpgapp.otpbackend.OTPBackend",)
 
-GPG = {"HOMEDIR": "keyring", "SERVER_PASSPHRASE": "", "SERVER_KEY": "", "ENCMAIL_FROM": ""}
+GPG = {"HOMEDIR": "/absolute/path/to/keyring", "SERVER_PASSPHRASE": "", "SERVER_KEY": "", "ENCMAIL_FROM": ""}
 
 EMAIL_HOST = ""
 EMAIL_PORT = 587

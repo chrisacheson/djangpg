@@ -9,6 +9,7 @@ Create djangpg's keyring and import your server keypair:
 Edit settings.py.  In addition to the usual Django settings, you'll need to change the following:
 
 	GPG:
+		HOMEDIR: the *absolute path* of the keyring directory
 		SERVER_KEY: the ID of your server keypair
 		SERVER_PASSPHRASE: the passphrase of your server key
 		ENCMAIL_FROM: email address that encrypted mail will be sent from
@@ -21,3 +22,8 @@ Edit settings.py.  In addition to the usual Django settings, you'll need to chan
 Set up the database:
 
 	python manage.py syncdb
+
+Change the permissions on the keyring directory so that the webserver can write to it:
+
+	chown -R root.www-data keyring/
+	chmod -R g+rw keyring/
