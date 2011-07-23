@@ -6,9 +6,10 @@ from django.contrib.auth.models import User
 from django.core.mail import send_mail
 
 import hashlib
-from random import SystemRandom
 import gnupg
 import re
+
+from randstring import randstring
 
 class GPGError(Exception):
     pass
@@ -82,6 +83,18 @@ class PublicKey(models.Model):
 
         return pgp_block
 
+    @staticmethod
+    def verify(signed_data):
+        """
+        Given signed data, return the PublicKey that signed it, or None if the signature is invalid.
+        """
+        verified = PublicKey._gpg.verify(signed_data)
+
+        if verified:
+            return PublicKey.objects.get(fingerprint=verified.pubkey_fingerprint)
+        else:
+            return None
+
     def send_mail(self, subject, body):
         """
         Send encrypted email to the address on this PublicKey, signed with the server key.
@@ -119,20 +132,13 @@ class OneTimePassword(models.Model):
 
         Return the newly created OneTimePassword object with the raw_password attribute set.
         """
-        alphabet = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-        password_length = 40
-        salt_length = 16
 
-        rng = SystemRandom()
         otp = OneTimePassword(user=user)
         otp.algorithm = "sha512"
         otp.iterations = 1000
-        otp.raw_password = ""
-        otp.salt = ""
+        otp.raw_password = randstring(40)
+        otp.salt = randstring(16)
         otp.expiration_counter = 0
-
-        for i in range(password_length): otp.raw_password += rng.choice(alphabet)
-        for i in range(salt_length): otp.salt += rng.choice(alphabet)
 
         otp.hash = OneTimePassword._make_hash(otp.algorithm, otp.iterations, otp.raw_password, otp.salt)
         otp.save()

@@ -1,0 +1,17 @@
+<html>
+<body>
+<h1>Log In (Signature-Based Authentication)</h1>
+
+{% if error_message %}<strong>{{ error_message }}</strong>{% endif %}
+
+<label>Challenge string:</label>
+<input type="text" name="challenge" size="50" value="{{ challenge }}" />
+<br />
+<br />
+
+<form action="/djangpg/check_signature/" method="post">
+{% csrf_token %}
+<label>Paste the signed challenge string here:</label><br />
+<textarea name="response" rows="4" cols="50"></textarea>
+<input type="submit" value="Log In" />
+</form></body></html>

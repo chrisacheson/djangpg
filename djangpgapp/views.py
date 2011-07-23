@@ -10,6 +10,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 
 from djangpgapp.models import PublicKey, OneTimePassword
+from randstring import randstring
 
 def index_view(request):
     return render_to_response("index.html", context_instance=RequestContext(request))
@@ -31,6 +32,24 @@ def login_view(request):
 
 def login_post(request):
     user = authenticate(otp_string=request.POST['otp'])
+    if user is not None:
+        if user.is_active:
+            login(request, user)
+            messages.success(request, "You have successfully logged in.")
+            return HttpResponseRedirect(reverse('djangpgapp.views.index_view'))
+        else:
+            messages.error(request, "Your account is disabled.")
+            return HttpResponseRedirect(reverse('djangpgapp.views.index_view'))
+    messages.error(request, "Login failed.")
+    return HttpResponseRedirect(reverse('djangpgapp.views.index_view'))
+
+def login_sign_view(request):
+    challenge = randstring(40)
+    request.session['challenge'] = challenge
+    return render_to_response("login_sign.html", {'challenge': challenge}, context_instance=RequestContext(request))
+
+def login_sign_post(request):
+    user = authenticate(challenge=request.session['challenge'], response=request.POST['response'])
     if user is not None:
         if user.is_active:
             login(request, user)

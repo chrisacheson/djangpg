@@ -7,5 +7,7 @@ urlpatterns = patterns('djangpgapp.views',
         (r'^addkey/$', 'keyinput_post'),
         (r'^login/$', 'login_view'),
         (r'^checkotp/$', 'login_post'),
+        (r'^login_sign/$', 'login_sign_view'),
+        (r'^check_signature/$', 'login_sign_post'),
         (r'^logout/$', 'logout_view'),
 )
