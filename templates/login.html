@@ -4,7 +4,7 @@
 
 {% if error_message %}<strong>{{ error_message }}</strong>{% endif %}
 
-<form action="/djangpg/checkotp/" method="post">
+<form action="/djangpg/login/checkotp/" method="post">
 {% csrf_token %}
 <label>Paste your one-time password here:</label><br />
 <input type="text" name="otp" size="50" />

@@ -98,7 +98,11 @@ INSTALLED_APPS = (
     'djangpgapp'
 )
 
-AUTHENTICATION_BACKENDS = ("djangpgapp.otpbackend.OTPBackend", "djangpgapp.signaturebackend.SignatureBackend",)
+AUTHENTICATION_BACKENDS = (
+    "djangpgapp.otpbackend.OTPBackend",
+    "djangpgapp.signaturebackend.SignatureBackend",
+    "djangpgapp.encryptedbackend.EncryptedBackend",
+)
 
 GPG = {"HOMEDIR": "/absolute/path/to/keyring", "SERVER_PASSPHRASE": "", "SERVER_KEY": "", "ENCMAIL_FROM": ""}
 

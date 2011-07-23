@@ -6,9 +6,9 @@ class SignatureBackend:
     Django auth backend for signature-based authentication.
     """
 
-    def authenticate(self, challenge=None, response=None):
-        if challenge and response and challenge in response:
-            return PublicKey.verify(response).user
+    def authenticate(self, signature_challenge=None, signed_response=None):
+        if signature_challenge and signed_response and signature_challenge in signed_response:
+            return PublicKey.verify(signed_response).user
 
         return None
 

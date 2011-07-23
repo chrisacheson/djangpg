@@ -1,0 +1,12 @@
+<html>
+<body>
+<h1>Log In (Encryption-Based Authentication) - Choose Key</h1>
+
+{% if error_message %}<strong>{{ error_message }}</strong>{% endif %}
+
+<form action="/djangpg/login_encrypt/key/" method="post">
+{% csrf_token %}
+<label>Paste your key fingerprint here:</label><br />
+<input type="text" name="fingerprint" size="40" />
+<input type="submit" value="Submit" />
+</form></body></html>

@@ -5,13 +5,13 @@
 {% if error_message %}<strong>{{ error_message }}</strong>{% endif %}
 
 <label>Challenge string:</label>
-<input type="text" name="challenge" size="50" value="{{ challenge }}" />
+<input type="text" name="signature_challenge" size="50" value="{{ signature_challenge }}" />
 <br />
 <br />
 
-<form action="/djangpg/check_signature/" method="post">
+<form action="/djangpg/login_sign/check_signature/" method="post">
 {% csrf_token %}
 <label>Paste the signed challenge string here:</label><br />
-<textarea name="response" rows="4" cols="50"></textarea>
+<textarea name="signed_response" rows="4" cols="50"></textarea>
 <input type="submit" value="Log In" />
 </form></body></html>

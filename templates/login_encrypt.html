@@ -1,0 +1,17 @@
+<html>
+<body>
+<h1>Log In (Encryption-Based Authentication)</h1>
+
+{% if error_message %}<strong>{{ error_message }}</strong>{% endif %}
+
+<label>Challenge:</label>
+<textarea name="encrypted_challenge" rows="30" cols="80">{{ encrypted_challenge }}</textarea>
+<br />
+<br />
+
+<form action="/djangpg/login_encrypt/check_response/" method="post">
+{% csrf_token %}
+<label>Paste the decrypted challenge here:</label><br />
+<input type="text" name="decrypted_response" size="40"></textarea>
+<input type="submit" value="Log In" />
+</form></body></html>
